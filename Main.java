@@ -57,6 +57,8 @@ class ExperimentData {
     double highMoves;
     double lowMoves;
     double averageMoves;
+    int xVariable;
+    int yVariable;
 
     public ExperimentData(int dimension, int maxMoves, int repetitions, int protocol, double lowMoves, double highMoves,
                           double averageMoves) {
@@ -83,6 +85,33 @@ public class Main {
     private static int[] experiment2DPM = new int[3];
     private static int[] experiment3Protocols = { 4, 4, 8, 8 };
     private static int[] experiment3DMR = new int[3];
+
+    private static void barGraph(ExperimentData data[]){
+        //Find the largest y value to scale the graph.
+        int scaleValue = 0;
+        for(int i = 0; i < data.length; i++){
+            if(data[i].yVariable > scaleValue)
+                scaleValue = data[i].yVariable;
+        }
+
+        //Transform and store scaled y values
+        int[] scaledY = new int[data.length];
+        for(int i = 0; i < data.length; i++)
+            scaledY[i] = (data[i].yVariable/scaleValue) * 100;
+
+        //Print the graph
+        PrintWriter writer = new PrintWriter(new FileWriter("outdata.txt"));
+        //Logic for header//
+        for(int i = 0; i < data.length; i++){
+            writer.print(data[i].xVariable + "| ");
+            for(int j = 0; i < scaledY[i]; j++)
+                writer.print("*");
+            writer.print("\n");
+        }
+
+
+
+        }
 
 
     //This function takes the input file and makes sure it's valid, and assigns each of the values
