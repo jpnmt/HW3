@@ -36,6 +36,11 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 //This class holds each person's coordinates as they play the game.
 class Person {
@@ -77,16 +82,8 @@ public class Main {
     //Here we define the data structures that are integral to the experiments.  The first 3 hold the results of the experiments,
     //Then the next 6 are what hold the parameters that we get from the input file.
     private static List<Double> resultsExp1 = new ArrayList<>();
-    private static List<Double> resultsExp2 = new ArrayList<>();
-    private static List<Double> resultsExp3 = new ArrayList<>();
-    private static int[] experiment1Dimensions = new int[5];
-    private static int[] experiment1PMR = new int[3];
-    private static int[] experiment2Reps = new int[5];
-    private static int[] experiment2DPM = new int[3];
-    private static int[] experiment3Protocols = { 4, 4, 8, 8 };
-    private static int[] experiment3DMR = new int[3];
 
-    private static void barGraph(ExperimentData data[]){
+    private static void barGraph(ExperimentData data[]) throws IOException {
         //Find the largest y value to scale the graph.
         int scaleValue = 0;
         for(int i = 0; i < data.length; i++){
@@ -113,227 +110,6 @@ public class Main {
 
         }
 
-
-    //This function takes the input file and makes sure it's valid, and assigns each of the values
-    //to its appropriate place in our data structure.
-    private static void parseInput() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("indata.txt"));
-
-        String line;
-        List<String> errors = new ArrayList<>();
-
-        try (Stream<String> fileStream = Files.lines(Paths.get("indata.txt"))) {
-            int noOfLines = (int) fileStream.count();
-            if (noOfLines > 6) {
-                errors.add("Input file contains too many lines.");
-            }
-        }
-
-        // Check and parse each line of input file
-        for (int i = 1; i <= 6; i++) {
-            line = br.readLine();
-            String[] values;
-
-            // regex matching logic credit:
-            // https://www.geeksforgeeks.org/how-to-check-if-string-contains-only-digits-in-java/
-            String regex = "[0-9]+";
-            Pattern p = Pattern.compile(regex);
-
-            // check every line to see if it is null. if true, this indicates a file with <6
-            // lines. if false, split line between commas.
-            if (line == null) {
-                errors.add("Incomplete input file.");
-                break;
-            } else {
-                // if line contains whitespace, add that to errors. then, eliminate all
-                // whitespace and keep analyzing file for errors.
-                if (line.contains(" ")) {
-                    errors.add("Line " + i + " contains whitespace.");
-                    line = line.replaceAll(" ", "");
-                }
-                values = line.split(",");
-            }
-
-            if (i == 1 && values.length == 5) {
-                // Check and store experiment 1 dimensions
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if ((!m.matches())) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-                        if (Integer.parseInt(values[j]) > 100) {
-                            errors.add("Line " + i + " contains a dimension greater than 100.");
-                        } else {
-                            if (j == 0) {
-                                experiment1Dimensions[j] = Integer.parseInt(values[j]);
-                            } else if ((Integer.parseInt(values[j]) < Integer.parseInt(values[j - 1]))) {
-                                errors.add("Values in line " + i + " not ordered in ascending order.");
-                            } else {
-                                experiment1Dimensions[j] = Integer.parseInt(values[j]);
-                            }
-                        }
-                    }
-                }
-
-            } else if (i == 2 && values.length == 3) {
-                // Check and store experiment 1 PMR
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if (!m.matches()) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-                        //I tried using switch statements here but for some reason they would repeatedly be tripped every loop.
-                        if (j == 0) {
-                            if ((Integer.parseInt(values[0]) != 4) && (Integer.parseInt(values[0]) != 8)) {
-                                errors.add("Line " + i + " contains an incorrect protocol code.");
-                                break;
-                            } else {
-                                experiment1PMR[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 1) {
-                            if (Integer.parseInt(values[1]) > 1000000) {
-                                errors.add("Line " + i + " contains a number of moves greater than 1000000.");
-                                break;
-                            } else {
-                                experiment1PMR[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 2) {
-                            if (Integer.parseInt(values[2]) > 100000) {
-                                errors.add("Line " + i + " contains a number of repetitions greater than 100000.");
-                                break;
-                            } else {
-                                experiment1PMR[j] = Integer.parseInt(values[j]);
-                            }
-                        }
-                    }
-                }
-
-            } else if (i == 3 && values.length == 5) {
-                // Check and store experiment 2 reps
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if ((!m.matches())) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-                        if (Integer.parseInt(values[j]) > 100000) {
-                            errors.add("Line " + i + " contains a number of repetitions greater than 100000.");
-                        } else {
-                            if (j == 0) {
-                                experiment2Reps[j] = Integer.parseInt(values[j]);
-                            } else if ((Integer.parseInt(values[j]) < Integer.parseInt(values[j - 1]))) {
-                                errors.add("Values in line " + i + " not ordered in ascending order.");
-                            } else {
-                                experiment2Reps[j] = Integer.parseInt(values[j]);
-                            }
-                        }
-                    }
-                }
-
-            } else if (i == 4 && values.length == 3) {
-                // Check and store experiment 2 DPM
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if (!m.matches()) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-                        if (j == 0) {
-                            if (Integer.parseInt(values[0]) > 100) {
-
-                                errors.add("Line " + i + " contains a dimension greater than 100.");
-                                break;
-                            } else {
-                                experiment2DPM[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 1) {
-                            if ((Integer.parseInt(values[1]) != 4) && (Integer.parseInt(values[1]) != 8)) {
-                                errors.add("Line " + i + " contains an incorrect protocol code.");
-                                break;
-                            } else {
-                                experiment2DPM[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 2) {
-                            if (Integer.parseInt(values[2]) > 1000000) {
-                                errors.add("Line " + i + " contains a number of moves greater than 1000000.");
-                                break;
-                            } else {
-                                experiment2DPM[j] = Integer.parseInt(values[j]);
-                            }
-                        }
-                    }
-                }
-
-            } else if (i == 5 && values.length == 4) {
-                // check if exp 3 protocols are correctly specified
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if ((!m.matches())) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-                        if (!line.equals("4,4,8,8")) {
-                            errors.add("Line " + i + " contains an illegal character.");
-                        }
-                    }
-                }
-
-            } else if (i == 6 && values.length == 3) {
-                // Check and store experiment 3 DMR
-                for (int j = 0; j < values.length; j++) {
-                    Matcher m = p.matcher(values[j]);
-                    if (!m.matches()) {
-                        errors.add("Line " + i + " contains an illegal character.");
-                        break;
-                    } else {
-
-                        if (j == 0) {
-                            if (Integer.parseInt(values[0]) > 100) {
-                                errors.add("Line " + i + " contains a dimension greater than 100.");
-                                break;
-                            } else {
-                                experiment3DMR[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 1) {
-                            if (Integer.parseInt(values[1]) > 1000000) {
-                                errors.add("Line " + i + " contains a number of moves greater than 1000000.");
-                                break;
-                            } else {
-                                experiment3DMR[j] = Integer.parseInt(values[j]);
-                            }
-                        } else if (j == 2) {
-                            if (Integer.parseInt(values[2]) > 100000) {
-                                errors.add("Line " + i + " contains a number of repetitions greater than 100000.");
-                                break;
-                            } else {
-                                experiment3DMR[j] = Integer.parseInt(values[j]);
-                            }
-                        }
-                    }
-                }
-
-            } else {
-                errors.add("Line " + i + " is the wrong length.");
-            }
-        }
-
-        br.close();
-
-        // print any problematic lines, if there are any.
-        if (!errors.isEmpty())
-
-        {
-            System.out.println(errors.size() + " error(s) found:");
-            for (String error : errors) {
-                System.out.println(error);
-            }
-            System.exit(1);
-        } else {
-            System.out.println("No errors found in input file.");
-        }
-    }
 
     // Function to move the person, protocol 4 or 8.  If it's protocol 4 it picks north, east, south, or west
     // and tries to make a move.  If it fails it goes to the next turn.  Protocol 8 gets compound directions,
@@ -441,84 +217,38 @@ public class Main {
 
     // This function takes the results of the experiments run in main() and
     // writes them to outdata.txt.
-    private static void outputGenerator() throws IOException {
-        // Packaging the results of the experiments into objects
-        ExperimentData[] experiment1 = new ExperimentData[5];
-        for (int i = 0; i < 5; i++)
-            experiment1[i] = new ExperimentData(experiment1Dimensions[i], experiment1PMR[1], experiment1PMR[2],
-                    experiment1PMR[0], resultsExp1.get((3 * i)), resultsExp1.get((3 * i) + 1),
-                    resultsExp1.get((3 * i) + 2));
+    private static void printTable(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Integer> yCoordinates, int M, int R, int P, char independentVar, char dependentVar) {
+        String[] headers = new String[] {
+                String.valueOf(independentVar),
+                "Protocol",
+                "Max Moves",
+                "Repeats",
+                String.valueOf(dependentVar)
+        };
 
-        ExperimentData[] experiment2 = new ExperimentData[5];
-        for (int i = 0; i < 5; i++)
-            experiment2[i] = new ExperimentData(experiment2DPM[0], experiment2DPM[2], experiment2Reps[i],
-                    experiment2DPM[1], resultsExp2.get((3 * i)), resultsExp2.get((3 * i) + 1),
-                    resultsExp2.get((3 * i) + 2));
+        out.println(String.format("%-12s| %-10s| %-10s| %-10s| %-10s", (Object[]) headers));
+        out.println("-------------------------------------------------------------");
 
-        ExperimentData[] experiment3 = new ExperimentData[4];
-        for (int i = 0; i < 4; i++)
-            experiment3[i] = new ExperimentData(experiment3DMR[0], experiment3DMR[1], experiment3DMR[2],
-                    experiment3Protocols[i], resultsExp3.get((3 * i)), resultsExp3.get((3 * i) + 1),
-                    resultsExp3.get((3 * i) + 2));
+        for (int i = 0; i < xCoordinates.size(); i++) {
+            int x = xCoordinates.get(i);
+            int y = yCoordinates.get(i);
 
-        // write gets results of experiments and writes them to a file
-        PrintWriter writer = new PrintWriter(new FileWriter("outdata.txt"));
-        System.out.println("Generating results...");
-        writer.println(
-                "Experiment #1 \nChanges the dimensions of the grid. Other variables are held constant.");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        writer.println(
-                "|              |  Max Number  |               |            |    Lowest    |    Highest   |    Average  |");
-        writer.println(
-                "|  Dimensions  |   of Moves   |  Repetitions  |  Protocol  |  # of moves  |  # of moves  |  # of moves |");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        for (int i = 0; i < 5; i++) {
-            writer.printf("| %-12d | %-12d | %-13d | %-10d | %-12.0f | %-12.0f | %-11.2f |\n", experiment1[i].Dimension,
-                    experiment1[i].maxMoves, experiment1[i].repetitions, experiment1[i].protocol,
-                    experiment1[i].lowMoves, experiment1[i].highMoves, experiment1[i].averageMoves);
-            writer.println(
-                    "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
+            if (independentVar == 'D') {
+                out.printf("%-12d| %-10d| %-10d| %-10d| %-10d\n", x, P, M, R, y);
+            } else {
+                out.printf("%-12d| %-10d| %-10d| %-10d| %-10d\n", y, P, M, R, x);
+            }
         }
-        writer.println(
-                "Experiment #2 \nChanges the number of wanderings (repeats) on each row. Other variables are held\r\n" + //
-                        "constant.");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        writer.println(
-                "|              |  Max Number  |               |            |    Lowest    |    Highest   |    Average  |");
-        writer.println(
-                "|  Repetitions |   of Moves   |  Dimensions   |  Protocol  |  # of moves  |  # of moves  |  # of moves |");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
+    }
 
-        for (int i = 0; i < 5; i++) {
-            writer.printf("| %-12d | %-12d | %-13d | %-10d | %-12.0f | %-12.0f | %-11.2f |\n", experiment2[i].repetitions,
-                    experiment2[i].maxMoves, experiment2[i].Dimension, experiment2[i].protocol,
-                    experiment2[i].lowMoves, experiment2[i].highMoves, experiment2[i].averageMoves);
-            writer.println(
-                    "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
+    private static void printBarGraph(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Integer> yCoordinates) {
+        out.println("\nTypewriter Graph");
+        for (int i = 0; i < xCoordinates.size(); i++) {
+            out.print(xCoordinates.get(i) + " | ");
+            int length = yCoordinates.get(i);
+            for (int j = 0; j < length; j++) out.print("*");
+            out.println();
         }
-        writer.println(
-                "Experiment #3 \nChanges the protocols. Other variables are held constant.");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        writer.println(
-                "|              |  Max Number  |               |            |    Lowest    |    Highest   |    Average  |");
-        writer.println(
-                "|  Protocol    |   of Moves   |  Repetitions  | Dimensions |  # of moves  |  # of moves  |  # of moves |");
-        writer.println(
-                "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        for (int i = 0; i < 4; i++) {
-            writer.printf("| %-12d | %-12d | %-13d | %-10d | %-12.0f | %-12.0f | %-11.2f |\n", experiment3[i].protocol,
-                    experiment3[i].maxMoves, experiment3[i].repetitions, experiment3[i].Dimension,
-                    experiment3[i].lowMoves, experiment3[i].highMoves, experiment3[i].averageMoves);
-            writer.println(
-                    "*--------------*--------------*---------------*------------*--------------*--------------*-------------*");
-        }
-        System.out.println("Results written to outdata.txt.");
-        writer.close();
     }
 
     public static void main(String[] args) throws IOException {
@@ -533,42 +263,114 @@ public class Main {
         double low;
         double high;
         double average;
-        parseInput();
+
+        //                            Parsing Input
+        //----------------------------------------------------------------------------------------//
+        ArrayList<Integer> xCoordinates = new ArrayList<>();
+        ArrayList<Integer> yCoordinates = new ArrayList<>();
+        int M = 0, R = 0, P = 0, D = 0;
+        char independentVar;
+        char dependentVar;
+
+        try (Scanner in = new Scanner(new File("indata.txt"));
+             PrintWriter out = new PrintWriter("outdata.txt")) {
+
+            // Read independent variable line
+            String independentLine = in.nextLine().trim();
+            String[] independentParts = independentLine.split(",");
+            if (independentParts.length < 2 || !independentParts[0].equals("independent"))
+                throw new IllegalArgumentException("Invalid independent variable line format");
+
+            independentVar = independentParts[1].charAt(0);
+            for (int i = 2; i < independentParts.length; i++) {
+                try {
+                    xCoordinates.add(Integer.parseInt(independentParts[i]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid integer in independent variable line");
+                }
+            }
+
+            // Process three 'fixed' lines
+            for (int i = 0; i < 3; i++) {
+                String fixedLine = in.nextLine().trim();
+                String[] fixedParts = fixedLine.split(",");
+                if (fixedParts.length != 3 || !fixedParts[0].equals("fixed"))
+                    throw new IllegalArgumentException("Invalid fixed variable line format");
+
+                char switchIdentifier = fixedParts[1].charAt(0);
+                int value;
+                try {
+                    value = Integer.parseInt(fixedParts[2]);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid integer in fixed variable line");
+                }
+                //Matt--I added case D in case dimension is a fixed variable
+                switch (switchIdentifier) {
+                    case 'M':
+                        M = value;
+                        break;
+                    case 'R':
+                        R = value;
+                        break;
+                    case 'P':
+                        P = value;
+                        break;
+                    case 'D':
+                        D = value;
+                    default:
+                        throw new IllegalArgumentException("Invalid Variable in fixed line");
+                }
+            }
+
+            // Read dependent variable line
+            String dependentLine = in.nextLine().trim();
+            String[] dependentParts = dependentLine.split(",");
+            if (dependentParts.length != 2 || !dependentParts[0].equals("dependent"))
+                throw new IllegalArgumentException("Invalid dependent variable line format");
+
+            dependentVar = dependentParts[1].charAt(0);
+
+
+        //                                  Printing Output
+        //--------------------------------------------------------------------------------------------------//
+        // Validate and print Table and BarGraph
+        if (xCoordinates.size() != yCoordinates.size())
+            throw new IllegalArgumentException("Mismatch in size of xCoordinates and yCoordinates");
+
+        printTable(out, xCoordinates, yCoordinates, M, R, P, independentVar, dependentVar);
+        printBarGraph(out, xCoordinates, yCoordinates);
+    } catch (FileNotFoundException | IllegalArgumentException e) {
+        System.err.println("Error: " + e.getMessage());
+    }
+
         List<Integer> data = new ArrayList<>();
+        if(independentVar != null) {
 
-        // Running experiment 1 and logging the calculations to a new results data structure.
-        for (int i = 0; i < 5; i++) {
-            data = experiment(experiment1PMR[2], experiment1Dimensions[i], experiment1PMR[1], experiment1PMR[0]);
-            low = Collections.min(data);
-            high = Collections.max(data);
-            average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
-            resultsExp1.add(low);
-            resultsExp1.add(high);
-            resultsExp1.add(average);
+            char switchIdentifier = independentVar;
+            for (int i = 0; i < xCoordinates.size(); i++) {
+                switch (switchIdentifier) {
+                    case 'M':
+                        data = experiment(R, D, xCoordinates.get(i), P);
+                        break;
+                    case 'D':
+                        data = experiment(R, xCoordinates.get(i), M, P);
+                        break;
+                    case 'R':
+                        data = experiment(xCoordinates.get(i), D, M, P);
+                        break;
+                    case 'P':
+                        data = experiment(R, D, M, xCoordinates.get(i));
+                        break;
+
+                }
+
+                low = Collections.min(data);
+                high = Collections.max(data);
+                average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
+                resultsExp1.add(low);
+                resultsExp1.add(high);
+                resultsExp1.add(average);
+            }
         }
-
-        // Running Experiment 2 and logging the calculations to a new results data structure.
-        for (int i = 0; i < 5; i++) {
-            data = experiment(experiment2Reps[i], experiment2DPM[0], experiment2DPM[2], experiment2DPM[1]);
-            low = Collections.min(data);
-            high = Collections.max(data);
-            average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
-            resultsExp2.add(low);
-            resultsExp2.add(high);
-            resultsExp2.add(average);
-        }
-
-        // Running Experiment 3 and logging the calculations to a new results data structure.
-        for (int i = 0; i < 4; i++) {
-            data = experiment(experiment3DMR[2], experiment3DMR[0], experiment3DMR[1], experiment3Protocols[i]);
-            low = Collections.min(data);
-            high = Collections.max(data);
-            average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
-            resultsExp3.add(low);
-            resultsExp3.add(high);
-            resultsExp3.add(average);
-        }
-
-        outputGenerator();
     }
 }

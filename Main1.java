@@ -96,278 +96,278 @@ public class Main
   //to its appropriate place in our data structure.
   private static void parseInput () throws IOException
   {
-    BufferedReader br = new BufferedReader (new FileReader ("indata.txt"));
+	  BufferedReader br = new BufferedReader (new FileReader ("indata.txt"));
 
-    String line;
-      List < String > errors = new ArrayList <> ();
+	  String line;
+	  List < String > errors = new ArrayList <> ();
 
-      try (Stream < String > fileStream =
-	   Files.lines (Paths.get ("indata.txt")))
-    {
-      int noOfLines = (int) fileStream.count ();
-      if (noOfLines > 5)
-	{
-	  errors.add ("Input file contains too many lines.");
-	}
-    }
-
-    // Check and parse each line of input file
-    for (int i = 1; i <= 5; i++)
-      {
-	line = br.readLine ();
-	String[]values;
-
-	// regex matching logic credit:
-	// https://www.geeksforgeeks.org/how-to-check-if-string-contains-only-digits-in-java/
-	String regex = "[A-Za-z0-9]+";
-	Pattern p = Pattern.compile (regex);
-
-	// check every line to see if it is null. if true, this indicates a file with <5
-	// lines. if false, split line between commas.
-	if (line == null)
+	  try (Stream < String > fileStream =
+				   Files.lines (Paths.get ("indata.txt")))
 	  {
-	    errors.add ("Incomplete input file.");
-	    break;
+		  int noOfLines = (int) fileStream.count ();
+		  if (noOfLines > 5 || noOfLines < 5)
+		  {
+			  errors.add ("Input file contains incorrect number of lines.");
+		  }
 	  }
-	else
+
+	  // Check and parse each line of input file
+	  for (int i = 1; i <= 5; i++)
 	  {
-	    // if line contains whitespace, add that to errors. then, eliminate all
-	    // whitespace and keep analyzing file for errors.
-	    if (line.contains (" "))
-	      {
-		errors.add ("Line " + i + " contains whitespace.");
-		line = line.replaceAll (" ", "");
-	      }
-	    values = line.split (",");
-	  }
+		  line = br.readLine ();
+		  String[]values;
 
-if (i == 1 && values.length >= 4 && values.length <= 14) {
-	    // Check and store experiment 1 dimensions
-	for (int j = 0; j < values.length; j++) {
-		Matcher m = p.matcher (values[j]);
-		if ((!m.matches ())) {
-		    errors.add ("Line " + i +
-				" contains an illegal character.");
-		    break;
-		 } else {
-		    if (j >= 2)
-		      {
-			    if (Integer.parseInt (values[j]) > 100)
+		  // regex matching logic credit:
+		  // https://www.geeksforgeeks.org/how-to-check-if-string-contains-only-digits-in-java/
+		  String regex = "[A-Za-z0-9]+";
+		  Pattern p = Pattern.compile (regex);
+
+		  // check every line to see if it is null. if true, this indicates a file with <5
+		  // lines. if false, split line between commas.
+		  if (line == null)
+		  {
+			  errors.add ("Incomplete input file.");
+			  break;
+		  }
+		  else
+		  {
+			  // if line contains whitespace, add that to errors. then, eliminate all
+			  // whitespace and keep analyzing file for errors.
+			  if (line.contains (" "))
 			  {
-			    errors.add ("Line " + i +
-					" contains a dimension greater than 100.");
+				  errors.add ("Line " + i + " contains whitespace.");
+				  line = line.replaceAll (" ", "");
 			  }
-		    }  else {
-			    if (!values[0].contains ("independent"))
-			      {
-				errors.add ("Line " + i +
-					    " contains the wrong header.");
-				break;
-			      }
-			  
-			else
-			{
-			  if (j == 2)
-			    {
-			      experiment1Dimensions[j] =
-				Integer.parseInt (values[j]);
-			    }
-			  else {
-			    if (j >=2 && (Integer.parseInt (values[j]) <
-				 Integer.parseInt (values[j - 1]))) {
-			  
-			      errors.add ("Values in line " + i +
-					  " not ordered in ascending order.");
-			    
-			    
-			  } else
-			    {
-			      experiment1Dimensions[j] =
-				Integer.parseInt (values[j]);
-			    }
-			}
+			  values = line.split (",");
+		  }
 
-		      }
+		  if (i == 1 && values.length >= 4 && values.length <= 14) {
+			  // Check and store experiment 1 dimensions
+			  for (int j = 0; j < values.length; j++) {
+				  Matcher m = p.matcher (values[j]);
+				  if ((!m.matches ())) {
+					  errors.add ("Line " + i +
+							  " contains an illegal character.");
+					  break;
+				  } else {
+					  if (j >= 2)
+					  {
+						  if (Integer.parseInt (values[j]) > 100)
+						  {
+							  errors.add ("Line " + i +
+									  " contains a dimension greater than 100.");
+						  }
+					  }  else {
+						  if (!values[0].contains ("independent"))
+						  {
+							  errors.add ("Line " + i +
+									  " contains the wrong header.");
+							  break;
+						  }
 
-	      }
-	
-		 }
-}
+						  else
+						  {
+							  if (j == 2)
+							  {
+								  experiment1Dimensions[j] =
+										  Integer.parseInt (values[j]);
+							  }
+							  else {
+								  if (j >=2 && (Integer.parseInt (values[j]) <
+										  Integer.parseInt (values[j - 1]))) {
+
+									  errors.add ("Values in line " + i +
+											  " not ordered in ascending order.");
+
+
+								  } else
+								  {
+									  experiment1Dimensions[j] =
+											  Integer.parseInt (values[j]);
+								  }
+							  }
+
+						  }
+
+					  }
+
+				  }
+			  }
+		  }
+
+
+		  else if (i == 2 && values.length == 3)
+		  {
+			  // Check and store experiment 1 PMR
+			  for (int j = 0; j < values.length; j++)
+			  {
+				  Matcher m = p.matcher (values[j]);
+				  if (!m.matches ())
+				  {
+					  errors.add ("Line " + i +
+							  " contains an illegal character.");
+					  break;
+				  }
+				  else
+				  {
+					  //I tried using switch statements here but for some reason they would repeatedly be tripped every loop.
+					  if (j == 0)
+					  {
+						  if (!values[0].contains ("fixed"))
+						  {
+							  errors.add ("Line " + i +
+									  " contains the wrong header.");
+							  break;
+						  }
+						  else
+						  {
+							  experiment1PMR[j] = Integer.parseInt (values[j]);
+						  }
+					  }
+					  else if (j == 2)
+					  {
+						  if (Integer.parseInt (values[2]) > 100000)
+						  {
+							  errors.add ("Line " + i +
+									  " contains a number of repetitions greater than 100000.");
+							  break;
+						  }
+						  else
+						  {
+							  experiment1PMR[j] = Integer.parseInt (values[j]);
+						  }
+					  }
+				  }
+			  }
+
+		  }
+		  else if (i == 3 && values.length == 5)
+		  {
+			  // Check and store experiment 2 reps
+			  for (int j = 0; j < values.length; j++)
+			  {
+				  Matcher m = p.matcher (values[j]);
+				  if ((!m.matches ()))
+				  {
+					  errors.add ("Line " + i +
+							  " contains an illegal character.");
+					  break;
+				  }
+				  else
+				  {
+					  if (Integer.parseInt (values[j]) > 100000)
+					  {
+						  errors.add ("Line " + i +
+								  " contains a number of repetitions greater than 100000.");
+					  }
+					  else
+					  {
+						  if (!values[0].contains ("fixed"))
+						  {
+							  errors.add ("Line " + i +
+									  " contains the wrong header.");
+						  }
+					  }
+				  }
+			  }
+
+		  }
+		  else if (i == 4 && values.length == 3)
+		  {
+			  // Check and store experiment 2 DPM
+			  for (int j = 0; j < values.length; j++)
+			  {
+				  Matcher m = p.matcher (values[j]);
+				  if (!m.matches ())
+				  {
+					  errors.add ("Line " + i +
+							  " contains an illegal character.");
+					  break;
+				  }
+				  else
+				  {
+					  if (j == 0)
+					  {
+						  if (!values[0].contains ("fixed"))
+						  {
+							  errors.add ("Line " + i +
+									  " contains the wrong header.");
+						  }
+					  }
+					  else if (j == 2)
+					  {
+						  if ((Integer.parseInt (values[2]) != 4)
+								  && (Integer.parseInt (values[2]) != 8))
+						  {
+							  errors.add ("Line " + i +
+									  " contains an incorrect protocol code.");
+							  break;
+						  }
+						  else
+						  {
+							  experiment2DPM[j] = Integer.parseInt (values[j]);
+						  }
+					  }
+				  }
+			  }
+
+		  }
+		  else if (i == 5 && values.length == 4)
+		  {
+			  // check if exp 3 protocols are correctly specified
+			  for (int j = 0; j < values.length; j++)
+			  {
+				  Matcher m = p.matcher (values[j]);
+				  if ((!m.matches ()))
+				  {
+					  errors.add ("Line " + i +
+							  " contains an illegal character.");
+					  break;
+				  }
+				  else if (j == 0)
+				  {
+					  if (!values[0].contains ("dependent"))
+					  {
+						  errors.add ("Line " + i +
+								  " contains the wrong header.");
+					  }
+					  else if (j == 1)
+					  {
+						  if (!values[1].contains ("L")
+								  || !values[1].contains ("H")
+								  || !values[1].contains ("A"))
+						  {
+							  errors.add ("Line" + i +
+									  " contains an illegal character");
+						  }
+					  }
+				  }
+			  }
+
+		  }
+		  else
+		  {
+			  errors.add ("Line " + i + " is the wrong length.");
+		  }
 	  }
-      
-  
-	else if (i == 2 && values.length == 3)
+
+	  br.close ();
+
+	  // print any problematic lines, if there are any.
+	  if (!errors.isEmpty ())
+
 	  {
-	    // Check and store experiment 1 PMR
-	    for (int j = 0; j < values.length; j++)
-	      {
-		Matcher m = p.matcher (values[j]);
-		if (!m.matches ())
+		  System.out.println (errors.size () + " error(s) found:");
+		  for (String error:errors)
 		  {
-		    errors.add ("Line " + i +
-				" contains an illegal character.");
-		    break;
+			  System.out.println (error);
 		  }
-		else
-		  {
-		    //I tried using switch statements here but for some reason they would repeatedly be tripped every loop.
-		    if (j == 0)
-		      {
-			if (!values[0].contains ("fixed"))
-			  {
-			    errors.add ("Line " + i +
-					" contains the wrong header.");
-			    break;
-			  }
-			else
-			  {
-			    experiment1PMR[j] = Integer.parseInt (values[j]);
-			  }
-		      }
-		    else if (j == 2)
-		      {
-			if (Integer.parseInt (values[2]) > 100000)
-			  {
-			    errors.add ("Line " + i +
-					" contains a number of repetitions greater than 100000.");
-			    break;
-			  }
-			else
-			  {
-			    experiment1PMR[j] = Integer.parseInt (values[j]);
-			  }
-		      }
-		  }
-	      }
-
+		  System.exit (1);
 	  }
-	else if (i == 3 && values.length == 5)
+	  else
 	  {
-	    // Check and store experiment 2 reps
-	    for (int j = 0; j < values.length; j++)
-	      {
-		Matcher m = p.matcher (values[j]);
-		if ((!m.matches ()))
-		  {
-		    errors.add ("Line " + i +
-				" contains an illegal character.");
-		    break;
-		  }
-		else
-		  {
-		    if (Integer.parseInt (values[j]) > 100000)
-		      {
-			errors.add ("Line " + i +
-				    " contains a number of repetitions greater than 100000.");
-		      }
-		    else
-		      {
-			if (!values[0].contains ("fixed"))
-			  {
-			    errors.add ("Line " + i +
-					" contains the wrong header.");
-			  }
-		      }
-		  }
-	      }
-
+		  System.out.println ("No errors found in input file.");
 	  }
-	else if (i == 4 && values.length == 3)
-	  {
-	    // Check and store experiment 2 DPM
-	    for (int j = 0; j < values.length; j++)
-	      {
-		Matcher m = p.matcher (values[j]);
-		if (!m.matches ())
-		  {
-		    errors.add ("Line " + i +
-				" contains an illegal character.");
-		    break;
-		  }
-		else
-		  {
-		    if (j == 0)
-		      {
-			if (!values[0].contains ("fixed"))
-			  {
-			    errors.add ("Line " + i +
-					" contains the wrong header.");
-			  }
-		      }
-		    else if (j == 2)
-		      {
-			if ((Integer.parseInt (values[2]) != 4)
-			    && (Integer.parseInt (values[2]) != 8))
-			  {
-			    errors.add ("Line " + i +
-					" contains an incorrect protocol code.");
-			    break;
-			  }
-			else
-			  {
-			    experiment2DPM[j] = Integer.parseInt (values[j]);
-			  }
-		      }
-		  }
-	      }
-
-	  }
-	else if (i == 5 && values.length == 4)
-	  {
-	    // check if exp 3 protocols are correctly specified
-	    for (int j = 0; j < values.length; j++)
-	      {
-		Matcher m = p.matcher (values[j]);
-		if ((!m.matches ()))
-		  {
-		    errors.add ("Line " + i +
-				" contains an illegal character.");
-		    break;
-		  }
-		else if (j == 0)
-		  {
-		    if (!values[0].contains ("dependent"))
-		      {
-			errors.add ("Line " + i +
-				    " contains the wrong header.");
-		      }
-		    else if (j == 1)
-		      {
-			if (!values[1].contains ("L")
-			    || !values[1].contains ("H")
-			    || !values[1].contains ("A"))
-			  {
-			    errors.add ("Line" + i +
-					" contains an illegal character");
-			  }
-		      }
-		  }
-	      }
-
-	  }
-	else
-	  {
-	    errors.add ("Line " + i + " is the wrong length.");
-	  }
-      }
-
-    br.close ();
-
-    // print any problematic lines, if there are any.
-    if (!errors.isEmpty ())
-
-      {
-	System.out.println (errors.size () + " error(s) found:");
-      for (String error:errors)
-	  {
-	    System.out.println (error);
-	  }
-	System.exit (1);
-      }
-    else
-      {
-	System.out.println ("No errors found in input file.");
-      }
   }
 
   // Function to move the person, protocol 4 or 8.  If it's protocol 4 it picks north, east, south, or west
