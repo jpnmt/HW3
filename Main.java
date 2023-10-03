@@ -179,9 +179,9 @@ public class Main {
             double y = yCoordinates.get(i);
 
             if (independentVar == 'D') {
-                out.printf("%-12d| %-10d| %-10d| %-10d| %-10f\n", x, P, M, R, y);
+                out.printf("%-12d| %-10d| %-10d| %-10d| %-10.0f\n", x, P, M, R, y);
             } else {
-                out.printf("%-12f| %-10d| %-10d| %-10d| %-10d\n", y, P, M, R, x);
+                out.printf("%-12.0f| %-10d| %-10d| %-10d| %-10d\n", y, P, M, R, x);
             }
         }
     }
@@ -262,6 +262,7 @@ public class Main {
                         break;
                     case 'D':
                         D = value;
+                        break;
                     default:
                         throw new IllegalArgumentException("Invalid Variable in fixed line");
                 }

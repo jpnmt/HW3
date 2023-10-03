@@ -1,5 +1,5 @@
-independent,D,1,3,5,7,9,11,13
+independent,R,1,3,5,7,9,11,13
 fixed,M,20000
-fixed,R,150
+fixed,D,15
 fixed,P,8
 dependent,L
