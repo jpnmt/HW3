@@ -53,63 +53,8 @@ class Person {
     }
 }
 
-//This is a class that creates an object that holds each repetition's of each experiment's data.
-class ExperimentData {
-    int Dimension;
-    int maxMoves;
-    int repetitions;
-    int protocol;
-    double highMoves;
-    double lowMoves;
-    double averageMoves;
-    int xVariable;
-    int yVariable;
-
-    public ExperimentData(int dimension, int maxMoves, int repetitions, int protocol, double lowMoves, double highMoves,
-                          double averageMoves) {
-        Dimension = dimension;
-        this.maxMoves = maxMoves;
-        this.repetitions = repetitions;
-        this.protocol = protocol;
-        this.highMoves = highMoves;
-        this.lowMoves = lowMoves;
-        this.averageMoves = averageMoves;
-    }
-}
 
 public class Main {
-
-    //Here we define the data structures that are integral to the experiments.  The first 3 hold the results of the experiments,
-    //Then the next 6 are what hold the parameters that we get from the input file.
-    private static List<Double> resultsExp1 = new ArrayList<>();
-
-    private static void barGraph(ExperimentData data[]) throws IOException {
-        //Find the largest y value to scale the graph.
-        int scaleValue = 0;
-        for(int i = 0; i < data.length; i++){
-            if(data[i].yVariable > scaleValue)
-                scaleValue = data[i].yVariable;
-        }
-
-        //Transform and store scaled y values
-        int[] scaledY = new int[data.length];
-        for(int i = 0; i < data.length; i++)
-            scaledY[i] = (data[i].yVariable/scaleValue) * 100;
-
-        //Print the graph
-        PrintWriter writer = new PrintWriter(new FileWriter("outdata.txt"));
-        //Logic for header//
-        for(int i = 0; i < data.length; i++){
-            writer.print(data[i].xVariable + "| ");
-            for(int j = 0; i < scaledY[i]; j++)
-                writer.print("*");
-            writer.print("\n");
-        }
-
-
-
-        }
-
 
     // Function to move the person, protocol 4 or 8.  If it's protocol 4 it picks north, east, south, or west
     // and tries to make a move.  If it fails it goes to the next turn.  Protocol 8 gets compound directions,
@@ -217,7 +162,7 @@ public class Main {
 
     // This function takes the results of the experiments run in main() and
     // writes them to outdata.txt.
-    private static void printTable(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Integer> yCoordinates, int M, int R, int P, char independentVar, char dependentVar) {
+    private static void printTable(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Double> yCoordinates, int M, int R, int P, char independentVar, char dependentVar) {
         String[] headers = new String[] {
                 String.valueOf(independentVar),
                 "Protocol",
@@ -231,22 +176,22 @@ public class Main {
 
         for (int i = 0; i < xCoordinates.size(); i++) {
             int x = xCoordinates.get(i);
-            int y = yCoordinates.get(i);
+            double y = yCoordinates.get(i);
 
             if (independentVar == 'D') {
-                out.printf("%-12d| %-10d| %-10d| %-10d| %-10d\n", x, P, M, R, y);
+                out.printf("%-12d| %-10d| %-10d| %-10d| %-10f\n", x, P, M, R, y);
             } else {
-                out.printf("%-12d| %-10d| %-10d| %-10d| %-10d\n", y, P, M, R, x);
+                out.printf("%-12f| %-10d| %-10d| %-10d| %-10d\n", y, P, M, R, x);
             }
         }
     }
 
-    private static void printBarGraph(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Integer> yCoordinates) {
+    private static void printBarGraph(PrintWriter out, ArrayList<Integer> xCoordinates, ArrayList<Double> yCoordinates) {
         out.println("\nTypewriter Graph");
         for (int i = 0; i < xCoordinates.size(); i++) {
             out.print(xCoordinates.get(i) + " | ");
-            int length = yCoordinates.get(i);
-            for (int j = 0; j < length; j++) out.print("*");
+            double length = yCoordinates.get(i);
+            for (int j = 0; j < (int) length; j++) out.print("*");
             out.println();
         }
     }
@@ -267,9 +212,9 @@ public class Main {
         //                            Parsing Input
         //----------------------------------------------------------------------------------------//
         ArrayList<Integer> xCoordinates = new ArrayList<>();
-        ArrayList<Integer> yCoordinates = new ArrayList<>();
+        ArrayList<Double> yCoordinates = new ArrayList<>();
         int M = 0, R = 0, P = 0, D = 0;
-        char independentVar;
+        char independentVar = 'z';
         char dependentVar;
 
         try (Scanner in = new Scanner(new File("indata.txt"));
@@ -330,6 +275,46 @@ public class Main {
 
             dependentVar = dependentParts[1].charAt(0);
 
+            //                                   Run Simulation
+            //------------------------------------------------------------------------------------------//
+            List<Integer> data = new ArrayList<>();
+            if(independentVar != 'z') {
+
+                for (int i = 0; i < xCoordinates.size(); i++) {
+                    switch (independentVar) {
+                        case 'M':
+                            data = experiment(R, D, xCoordinates.get(i), P);
+                            break;
+                        case 'D':
+                            data = experiment(R, xCoordinates.get(i), M, P);
+                            break;
+                        case 'R':
+                            data = experiment(xCoordinates.get(i), D, M, P);
+                            break;
+                        case 'P':
+                            data = experiment(R, D, M, xCoordinates.get(i));
+                            break;
+
+                    }
+                    switch (dependentVar) {
+                        case 'L':
+                            low = Collections.min(data);
+                            yCoordinates.add(low);
+                            break;
+                        case 'H':
+                            high = Collections.max(data);
+                            yCoordinates.add(high);
+                            break;
+                        case 'A':
+                            average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
+                            yCoordinates.add(average);
+                            break;
+                    }
+                }
+                System.out.println("X and Y coordinate sizes: " + xCoordinates.size() + " " + yCoordinates.size());
+                System.out.println("Independent and dependent vars: " + independentVar + dependentVar);
+            }
+
 
         //                                  Printing Output
         //--------------------------------------------------------------------------------------------------//
@@ -343,34 +328,14 @@ public class Main {
         System.err.println("Error: " + e.getMessage());
     }
 
-        List<Integer> data = new ArrayList<>();
-        if(independentVar != null) {
 
-            char switchIdentifier = independentVar;
-            for (int i = 0; i < xCoordinates.size(); i++) {
-                switch (switchIdentifier) {
-                    case 'M':
-                        data = experiment(R, D, xCoordinates.get(i), P);
-                        break;
-                    case 'D':
-                        data = experiment(R, xCoordinates.get(i), M, P);
-                        break;
-                    case 'R':
-                        data = experiment(xCoordinates.get(i), D, M, P);
-                        break;
-                    case 'P':
-                        data = experiment(R, D, M, xCoordinates.get(i));
-                        break;
 
-                }
 
-                low = Collections.min(data);
-                high = Collections.max(data);
-                average = data.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
-                resultsExp1.add(low);
-                resultsExp1.add(high);
-                resultsExp1.add(average);
-            }
-        }
+
+
+
+
+
+
     }
 }
