@@ -1,5 +1,5 @@
 //Language: Java
-//Programmers: Matthew Engrav,
+//Programmers: Matthew Engrav, Steven Cartwright, Jackson Petryka, Lucas Lovellette 
 //03 October 2023
 //CMP SCI 4500
 
@@ -12,13 +12,16 @@
 //southeast, or southwest. If the Person's move would move them out of bounds of the grid, another move is generated until
 //the Person can make a valid move. Persons alternate turns.
 
-//This program plays this game in three experiments using parameters supplied by indata.txt.
+//This program plays this game in one experiment using parameters supplied by indata.txt.
 //The input file must be formatted exactly as described in the homework specification. If it has white space, non-
 //digit or non-comma characters, too many or too few lines, lines with numbers out of ascending order, lines with an incorrent number of parameters,
 //or a parameter greater than the limits defined, it will log these errors in the console and terminate the program.
 
-//The program runs each experiment according to those parameters. It will take all the results, calculate the high, low,
-// and average values of each experiment, then it will log those results in an output file.
+//The program takes an independent variable (Dimensions of the board), three fixed data sets (protocal, max moves
+// and repeats), and a dependent variable (the high, low and average amount of moves made on each tern)
+
+//The information on the output includes a table and a bar graph. The graph's highest value goes to 100 and
+//other bars are scaled to 100. NOTE: info in the table is not exactly one-to-one with the bars on the graph
 
 //Java regex matching logic was looked up on GeeksforGeeks:
 // https://www.geeksforgeeks.org/how-to-check-if-string-contains-only-digits-in-java/
@@ -249,7 +252,7 @@ public class Main {
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Invalid integer in fixed variable line");
                 }
-                //Matt--I added case D in case dimension is a fixed variable
+                
                 switch (switchIdentifier) {
                     case 'M':
                         M = value;
@@ -281,6 +284,7 @@ public class Main {
             List<Integer> data = new ArrayList<>();
             if(independentVar != 'z') {
 
+            //switch statement for all the different variables in relation to independent and dependent variables
                 for (int i = 0; i < xCoordinates.size(); i++) {
                     switch (independentVar) {
                         case 'M':
@@ -323,6 +327,7 @@ public class Main {
         if (xCoordinates.size() != yCoordinates.size())
             throw new IllegalArgumentException("Mismatch in size of xCoordinates and yCoordinates");
 
+//Next 15 lines scale the bar graph in order to allign with the specifications given (see intro)
         printTable(out, xCoordinates, yCoordinates, M, R, P, independentVar, dependentVar);
         
         ArrayList<Double> scaledYCoordinates = new ArrayList<>();
@@ -336,22 +341,13 @@ for (double value : yCoordinates) {
     } else {
         scaledYCoordinates.add(0.0);
     }
-}   
+}
 
 printBarGraph(out, xCoordinates, scaledYCoordinates);
-        
+
     } catch (FileNotFoundException | IllegalArgumentException e) {
         System.err.println("Error: " + e.getMessage());
     }
-
-
-
-
-
-
-
-
-
 
     }
 }
