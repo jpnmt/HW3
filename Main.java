@@ -324,7 +324,22 @@ public class Main {
             throw new IllegalArgumentException("Mismatch in size of xCoordinates and yCoordinates");
 
         printTable(out, xCoordinates, yCoordinates, M, R, P, independentVar, dependentVar);
-        printBarGraph(out, xCoordinates, yCoordinates);
+        
+        ArrayList<Double> scaledYCoordinates = new ArrayList<>();
+
+double max = Collections.max(yCoordinates);
+
+for (double value : yCoordinates) {
+    if (max != 0.0) {
+        double scaled = (value / max) * 100.0;
+        scaledYCoordinates.add(scaled);
+    } else {
+        scaledYCoordinates.add(0.0);
+    }
+}   
+
+printBarGraph(out, xCoordinates, scaledYCoordinates);
+        
     } catch (FileNotFoundException | IllegalArgumentException e) {
         System.err.println("Error: " + e.getMessage());
     }
